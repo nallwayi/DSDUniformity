@@ -44,12 +44,12 @@ end
 if ~exist([folderHeader '/DBSCANResults/ClstrSizeWtMinPtsEps_' ...
         fileHeader '.fig'])
     
-    % minpoints vs eps vs noclusters plot
+%     minpoints vs eps vs noclusters plot
     f = figure;
     filename = 'ClstrSizeWtMinPtsEps';
     [MINPOINTS,EPS] = meshgrid(minPoints,eps);
     pcolor(MINPOINTS,EPS,nClusters)
-    %     plot(minPoints,nClusters,'-*b')
+%         plot(minPoints,nClusters,'-*b')
     title(['MinPoints- eps-nClusters ' strrep(fileHeader,'_','\_')])
     xlabel('MinPoints')
     ylabel('Eps')
@@ -59,9 +59,9 @@ if ~exist([folderHeader '/DBSCANResults/ClstrSizeWtMinPtsEps_' ...
     
 end
 
-ind = find(nClusters == max(reshape(nClusters,1,[])),1);
-indRw = rem(ind,size(nClusters,1));
-indCm = ceil(ind/size(nClusters,1));
+ind = find(nClusters' == max(reshape(nClusters,1,[])),1);
+indCm = rem(ind,size(nClusters,2));
+indRw = ceil(ind/size(nClusters,2));
 
 eps = eps(indRw);
 minPoints = minPoints(indCm);
