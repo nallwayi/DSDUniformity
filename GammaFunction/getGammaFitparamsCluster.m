@@ -3,9 +3,10 @@
 % -------------------------------------------------------------------------
 % Sept 22, 2021
 % Function to get the sclae and shape parameter of a cluster
+% Modified April 11,2022 to account for cfg file
 
 function getGammaFitparamsCluster(prtcleDiam,cluster,customCmap,clstrParamsNames)
-global folderHeader fileHeader
+global cfg
 
 holoClusters = cluster.holoClusters;
 
@@ -103,8 +104,8 @@ ylim([0 200])
 legend(leg);
 % plottools
 filename = 'ClstrDistParams';
-sgtitle([filename '_' fileHeader  clstrParamsNames ])
-savefig([folderHeader '/DBSCANResults/'  filename '_' fileHeader  clstrParamsNames '.fig'])
+sgtitle([filename '_' cfg.fileHeader  clstrParamsNames ])
+savefig([cfg.folderHeader '/' cfg.clusteringAlgo 'Results/'  filename '_' cfg.fileHeader  clstrParamsNames '.fig'])
 close
 
 % subplot(1,2,2)

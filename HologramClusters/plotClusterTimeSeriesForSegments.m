@@ -1,11 +1,13 @@
 % Function to get the time series of clusters from the segment with 
 % differnt quantities
 % 2022.02.14
-function plotClusterTimeSeriesForSegments(cldProps)
-global folderHeader fileHeader
+% Modified April 11,2022 to account for cfg file
 
-if ~exist(fullfile(folderHeader,'ClstrSegmentPlots'),'dir')
-    mkdir(fullfile(folderHeader,'ClstrSegmentPlots'))
+function plotClusterTimeSeriesForSegments(cldProps)
+global cfg
+
+if ~exist(fullfile(cfg.folderHeader,'ClstrSegmentPlots'),'dir')
+    mkdir(fullfile(cfg.folderHeader,'ClstrSegmentPlots'))
 end
 
 colors = [0.8000    0.8000    0.8000];
@@ -13,21 +15,21 @@ colorIndctr = ones(numel(cldProps.holoTime),1) * colors ;
 sz = 20;
 
 
-filelocation = fullfile(folderHeader,'DBSCANResults');
+filelocation = fullfile(cfg.folderHeader,'DBSCANResults');
 filedetailsClstr = dir(fullfile(filelocation,'*.mat'));
-filedetailsprtcleDiam = dir(fullfile(folderHeader,'*.mat'));
+filedetailsprtcleDiam = dir(fullfile(cfg.folderHeader,'*.mat'));
 
-searchStrng = fileHeader;
+searchStrng = cfg.fileHeader;
 
 for cnt=1:length(filedetailsClstr)
-    if any(strfind(filedetailsClstr(cnt).name, ['clusterInfo_' fileHeader]))
+    if any(strfind(filedetailsClstr(cnt).name, ['clusterInfo_' cfg.fileHeader]))
         load(fullfile(filelocation,filedetailsClstr(cnt).name))
     end  
 end
 for cnt=1:length(filedetailsprtcleDiam)
     if any(strfind(filedetailsprtcleDiam(cnt).name, ['prtcleDiam_' ...
-            fileHeader] ))
-        load(fullfile(folderHeader,filedetailsprtcleDiam(cnt).name))
+            cfg.fileHeader] ))
+        load(fullfile(cfg.folderHeader,filedetailsprtcleDiam(cnt).name))
     end
 end
 
@@ -55,8 +57,8 @@ else
     pltRnge = find(cldProps.holoTime == holotime(1))-1000:...
         find(cldProps.holoTime == holotime(end))+1000;
 end
-altRnge = [str2num(extractBefore(fileHeader,'_'))-100 ...
-    str2num(extractBefore(fileHeader,'_'))+100];
+altRnge = [str2num(extractBefore(cfg.fileHeader,'_'))-100 ...
+    str2num(extractBefore(cfg.fileHeader,'_'))+100];
 
 filename = 'ClstrTSWtNumConc';
 f = figure('units','normalized','outerposition',[0 0 1 1]);
@@ -87,12 +89,12 @@ end
 
 hold off
 title(['Cluster Time series with Number concentration- Altitude ' ...
-    strrep(fileHeader,'_','\_')])
+    strrep(cfg.fileHeader,'_','\_')])
 xlabel('Second of day (s)')
 ylabel('Number Concentration (#/cm^3)')
 yyaxis right
 ylabel('Altitude (m)')
-savefig([folderHeader '/ClstrSegmentPlots/'  filename '_' fileHeader '.fig'])
+savefig([cfg.folderHeader '/ClstrSegmentPlots/'  filename '_' cfg.fileHeader '.fig'])
 close(f)
 
 % With LWC
@@ -125,12 +127,12 @@ end
 
 hold off
 title(['Cluster Time series with Liquid Water Content- Altitude ' ...
-    strrep(fileHeader,'_','\_')])
+    strrep(cfg.fileHeader,'_','\_')])
 xlabel('Second of day (s)')
 ylabel('Liquid Water Content (g/m^3)')
 yyaxis right
 ylabel('Altitude (m)')    
-savefig([folderHeader '/ClstrSegmentPlots/'  filename '_' fileHeader '.fig'])
+savefig([cfg.folderHeader '/ClstrSegmentPlots/'  filename '_' cfg.fileHeader '.fig'])
 
 close(f)
 
@@ -168,12 +170,12 @@ end
 
 hold off
 title(['Cluster Time series with Vertical velocity- Altitude ' ...
-    strrep(fileHeader,'_','\_')])
+    strrep(cfg.fileHeader,'_','\_')])
 xlabel('Second of day (s)')
 ylabel('Vertical velocity (m/s)')
 yyaxis right
 ylabel('Altitude (m)')    
-savefig([folderHeader '/ClstrSegmentPlots/'  filename '_' fileHeader '.fig'])
+savefig([cfg.folderHeader '/ClstrSegmentPlots/'  filename '_' cfg.fileHeader '.fig'])
 
 close(f)
 
@@ -208,19 +210,19 @@ end
 
 hold off
 title(['Cluster Time series with Drizzle LWC- Altitude ' ...
-    strrep(fileHeader,'_','\_')])
+    strrep(cfg.fileHeader,'_','\_')])
 xlabel('Second of day (s)')
 ylabel('drizzleLWC(g/m^3)')
 yyaxis right
 ylabel('Altitude (m)')    
-savefig([folderHeader '/ClstrSegmentPlots/'  filename '_' fileHeader '.fig'])
+savefig([cfg.folderHeader '/ClstrSegmentPlots/'  filename '_' cfg.fileHeader '.fig'])
 
 close(f)
 
 % pltRnge = find(cldProps.holoTime == holotime(1))-500:...
 %     find(cldProps.holoTime == holotime(end))+500;
-% altRnge = [str2num(extractBefore(fileHeader,'_'))-100 ...
-%     str2num(extractBefore(fileHeader,'_'))+100];
+% altRnge = [str2num(extractBefore(cfg.fileHeader,'_'))-100 ...
+%     str2num(extractBefore(cfg.fileHeader,'_'))+100];
 % figure
 % yyaxis left
 % sctrPlt = scatter(cldProps.Vals(1,pltRnge),cldProps.Vals(3,pltRnge),...

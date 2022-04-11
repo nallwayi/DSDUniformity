@@ -2,17 +2,21 @@
 % for a given KS Matrix. It also saves the all the possible hyperparameter
 % combination tried in the DBSCAN results folder
 %  2022.03.09
+% Modified April 11,2022 to account for cfg file
 
 function [eps,minPoints,nClusters,clusterInfo] = ...
     getMaxDBSCANClusters(ensmblKSMatrixCondConc)
-global folderHeader fileHeader
+global cfg
 
 filename = 'clusterMtrx';
-clusterInfoLoc= ([folderHeader '/DBSCANResults/'  filename '_' fileHeader  ...
+clusterInfoLoc= ([cfg.folderHeader '/DBSCANResults/'  filename '_' cfg.fileHeader  ...
     '.mat']);
 if ~exist(clusterInfoLoc,'file')
-    eps = 0.07:0.01:0.3;
-    minPoints = 10:1:50;
+    %     eps = 0.07:0.01:0.3;
+    % %     eps = 0.1;
+    %     minPoints = 10:1:100;
+    eps = cfg.eps;
+    minPoints = cfg.minPoints;
     graph = ensmblKSMatrixCondConc;
     graph(graph>1) = nan;
     
@@ -33,28 +37,35 @@ if ~exist(clusterInfoLoc,'file')
         end
     end
     
-    save([folderHeader '/DBSCANResults/'  filename '_' fileHeader  ...
+    save([cfg.folderHeader '/DBSCANResults/'  filename '_' cfg.fileHeader  ...
         '.mat'],'eps','minPoints','nClusters','labels','clstrElemnts')
 else
-    load([folderHeader '/DBSCANResults/'  filename '_' fileHeader  ...
+    load([cfg.folderHeader '/DBSCANResults/'  filename '_' cfg.fileHeader  ...
         '.mat'])
 end
 
 
-if ~exist([folderHeader '/DBSCANResults/ClstrSizeWtMinPtsEps_' ...
-        fileHeader '.fig'])
+if ~exist([cfg.folderHeader '/DBSCANResults/ClstrSizeWtMinPtsEps_' ...
+        cfg.fileHeader '.fig'])
     
-%     minpoints vs eps vs noclusters plot
+    %     minpoints vs eps vs noclusters plot
     f = figure;
     filename = 'ClstrSizeWtMinPtsEps';
-    [MINPOINTS,EPS] = meshgrid(minPoints,eps);
-    pcolor(MINPOINTS,EPS,nClusters)
-%         plot(minPoints,nClusters,'-*b')
-    title(['MinPoints- eps-nClusters ' strrep(fileHeader,'_','\_')])
-    xlabel('MinPoints')
-    ylabel('Eps')
-    colorbar
-    savefig([folderHeader '/DBSCANResults/'  filename '_' fileHeader '.fig'])
+    if numel(eps)==1
+        plot(minPoints,nClusters,'-*b')
+        xlabel('MinPoints')
+        ylabel('nClusters')
+    else
+%         [MINPOINTS,EPS] = meshgrid(minPoints,eps);
+        imagesc(minPoints,eps,nClusters)
+        xlabel('MinPoints')
+        ylabel('Eps')
+        colorbar
+        set(gca,'YDir','normal')
+    end
+    title(['MinPoints- eps-nClusters ' strrep(cfg.fileHeader,'_','\_')])
+    
+    savefig([cfg.folderHeader '/DBSCANResults/'  filename '_' cfg.fileHeader '.fig'])
     close(f)
     
 end

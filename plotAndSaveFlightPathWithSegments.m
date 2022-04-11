@@ -1,14 +1,15 @@
 % Function to plot the flight path of different flight segments for a
 % research flight 
 % 2022 - 02 -28
+% Modified April 11,2022 to account for cfg file
 
 function plotAndSaveFlightPathWithSegments(cldProps,Ltime,Utime)
-global folderHeader fileHeader
+global  cfg
 
 lat = 38.77;
 lon = 360-27.0995;
 
-figname = [folderHeader(end-7:end) '_SegmentFlightPath'];
+figname = [cfg.folderHeader(end-7:end) '_SegmentFlightPath'];
 f = figure('units','normalized','outerposition',[0 0 1 1]);
 gx = geoaxes('Basemap','satellite','ZoomLevel',8);
 hold on
@@ -29,6 +30,6 @@ for cnt  = 1:numel(Ltime)
 end
 
 
-savefig([folderHeader '/'  figname '.fig'])
+savefig([cfg.folderHeader '/'  figname '.fig'])
 close(f)
 end

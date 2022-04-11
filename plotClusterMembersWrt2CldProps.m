@@ -1,13 +1,14 @@
 % Function to plot the cluster members of a segment with respect to any two
 % variables of interest
+% Modified April 11,2022 to account for cfg file
 
 function plotClusterMembersWrt2CldProps(cldProps,var1,var2)
 
 
-global folderHeader fileHeader
+global cfg
 
-if ~exist(fullfile(folderHeader,'ClstrSegmentPlots'),'dir')
-    mkdir(fullfile(folderHeader,'ClstrSegmentPlots'))
+if ~exist(fullfile(cfg.folderHeader,'ClstrSegmentPlots'),'dir')
+    mkdir(fullfile(cfg.folderHeader,'ClstrSegmentPlots'))
 end
 
 colors = [0.8000    0.8000    0.8000];
@@ -15,22 +16,22 @@ colorIndctr = ones(numel(cldProps.holoTime),1) * colors ;
 sz = 20;
 
 
-filelocation = fullfile(folderHeader,'DBSCANResults');
+filelocation = fullfile(cfg.folderHeader,'DBSCANResults');
 filedetailsClstr = dir(fullfile(filelocation,'*.mat'));
-filedetailsprtcleDiam = dir(fullfile(folderHeader,'*.mat'));
+filedetailsprtcleDiam = dir(fullfile(cfg.folderHeader,'*.mat'));
 
-searchStrng = fileHeader;
+searchStrng = cfg.fileHeader;
 
 %  Loading the files
 for cnt=1:length(filedetailsClstr)
-    if any(strfind(filedetailsClstr(cnt).name, ['clusterInfo_' fileHeader]))
+    if any(strfind(filedetailsClstr(cnt).name, ['clusterInfo_' cfg.fileHeader]))
         load(fullfile(filelocation,filedetailsClstr(cnt).name))
     end  
 end
 for cnt=1:length(filedetailsprtcleDiam)
     if any(strfind(filedetailsprtcleDiam(cnt).name, ['prtcleDiam_' ...
-            fileHeader] ))
-        load(fullfile(folderHeader,filedetailsprtcleDiam(cnt).name))
+            cfg.fileHeader] ))
+        load(fullfile(cfg.folderHeader,filedetailsprtcleDiam(cnt).name))
     end
 end
 
@@ -66,10 +67,10 @@ end
 
 hold off
 title(['Cluster Info with ' var1 ' and ' var2 '- Altitude ' ...
-    strrep(fileHeader,'_','\_')])
+    strrep(cfg.fileHeader,'_','\_')])
 xlabel(var1)
 ylabel(var2)
-savefig([folderHeader '/ClstrSegmentPlots/'  filename '_' fileHeader '.fig'])
+savefig([cfg.folderHeader '/ClstrSegmentPlots/'  filename '_' cfg.fileHeader '.fig'])
 close(f)
 
 

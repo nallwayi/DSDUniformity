@@ -2,8 +2,9 @@
 %  Sept 09, 2021
 %  Function to get the average PDF of a hologram Clusters
 %  The function returns the PDF plots of the different hologram Clusters 
+% Modified April 11,2022 to account for cfg file
 function averagePDFWithHoloClusters(prtcleDiam,cluster,customCmap,clstrParamsNames)
-global folderHeader fileHeader
+global cfg 
 
 holoClusters = cluster.holoClusters;
 

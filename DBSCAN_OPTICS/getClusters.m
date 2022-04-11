@@ -1,19 +1,27 @@
-%--------------------------------------------------------------------------
-% Jan 18, 2022
-% 
+
 % Function to retrieve DBSCAN results and use it to get the
 % average PDF and CDF info 
-function getDBSCANClusters(ensmblKSMatrixCondConc,prtcleDiam)
-global folderHeader fileHeader
+%--------------------------------------------------------------------------
+% Jan 18, 2022
+% Modified April 04,2022 to include OPTICS
+% Modified April 11,2022 to account for cfg file
 
-if ~exist(fullfile(folderHeader,'/DBSCANResults/'),'dir')
-    mkdir(fullfile(folderHeader,'/DBSCANResults/'))
+function getClusters(ensmblKSMatrixCondConc,prtcleDiam)
+global cfg
+
+if ~exist(fullfile(cfg.folderHeader,[cfg.clusteringAlgo 'Results/']),'dir')
+    mkdir(fullfile(cfg.folderHeader,[cfg.clusteringAlgo 'Results/']))
 end
 
 
-[eps,minPoints,nClusters,clusterInfo] = ...
-    getMaxDBSCANClusters(ensmblKSMatrixCondConc);
-
+if strcmp(cfg.clusteringAlgo,'DBSCAN')
+    [eps,minPoints,nClusters,clusterInfo] = ...
+        getMaxDBSCANClusters(ensmblKSMatrixCondConc);
+elseif strcmp(cfg.clusteringAlgo,'OPTICS')
+    
+    [eps,minPoints,nClusters,clusterInfo] = ...
+        getMaxOPTICSClusters(ensmblKSMatrixCondConc);
+end
 
 cluster.clusterInfo = clusterInfo;
 cluster.eps = eps;
@@ -22,10 +30,10 @@ cluster.nClusters = nClusters;
 clstrParamsNames = ['_eps' num2str(eps) '_minPoints_' num2str(minPoints)];
 
 filename = 'clusterInfo';
-clusterInfoLoc= ([folderHeader '/DBSCANResults/'  filename '_' fileHeader  ...
+clusterInfoLoc= ([cfg.folderHeader '/' cfg.clusteringAlgo 'Results/'  filename '_' cfg.fileHeader  ...
         clstrParamsNames '.mat']);
 if ~exist(clusterInfoLoc)
-    save([folderHeader '/DBSCANResults/'  filename '_' fileHeader  ...
+    save([cfg.folderHeader '/' cfg.clusteringAlgo 'Results/'  filename '_' cfg.fileHeader  ...
         clstrParamsNames '.mat'],'cluster')
 end
 
@@ -70,8 +78,8 @@ if cluster.nClusters > size(customCmap,1)-1
 end
 
 
-if ~exist([folderHeader '/DBSCANResults/KSMtrxWithClusterInfo_' ...
-        fileHeader  clstrParamsNames '.fig'],'file')
+if ~exist([cfg.folderHeader '/' cfg.clusteringAlgo 'Results/KSMtrxWithClusterInfo_' ...
+        cfg.fileHeader  clstrParamsNames '.fig'],'file')
     f=figure('Name','ClusterPDF','units','normalized','outerposition',[0 0 1 1]);
     filename = 'KSMtrxWithClusterInfo';
     
@@ -95,16 +103,21 @@ if ~exist([folderHeader '/DBSCANResults/KSMtrxWithClusterInfo_' ...
     title('Identified Clusters')
     colormap(im2,customCmap(1:cluster.nClusters+1,:));
     axis square
-    sgtitle([filename ' ' fileHeader clstrParamsNames])
-    savefig([folderHeader '/DBSCANResults/'  filename '_' fileHeader  clstrParamsNames '.fig'])
+    sgtitle([filename ' ' cfg.fileHeader clstrParamsNames])
+    savefig([cfg.folderHeader '/' cfg.clusteringAlgo 'Results/'  filename '_' cfg.fileHeader  clstrParamsNames '.fig'])
     close(f)
 
 end
 
-if ~exist([folderHeader '/DBSCANResults/ClstrDistParams_' fileHeader ...
+if ~exist([cfg.folderHeader '/' cfg.clusteringAlgo 'Results/ClstrDistParams_' cfg.fileHeader ...
         clstrParamsNames '.fig'],'file')
     averagePDFWithHoloClusters(prtcleDiam,cluster,customCmap,clstrParamsNames)
     getGammaFitparamsCluster(prtcleDiam,cluster,customCmap,clstrParamsNames)
+end
+
+if ~exist([cfg.folderHeader '/' cfg.clusteringAlgo 'Results/ClstrSpaghettiPlts_' cfg.fileHeader ...
+        clstrParamsNames '.fig'],'file')
+    spaghettiPlotsforClusters(prtcleDiam,cluster,customCmap,clstrParamsNames)
 end
 end
 %--------------------------------------------------------------------------
