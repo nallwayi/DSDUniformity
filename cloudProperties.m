@@ -17,6 +17,7 @@ function cldProps = cloudProperties(pStats,iwg,combinedConc)
 
     [~,concL] = getNumberConcentrationTimeSeries(pStats);
     [holoTime,LWC] = getLiquidWaterContentTimeSeries(pStats);
+    [holoMean,holoStd] = getPDFpropertiesTimeSeries(pStats);
     
     for cnt = 1:size(combinedConc.conc,1)
         combinedSecond(cnt) = datetime2sod(combinedConc.conc.UTC(cnt));
@@ -66,6 +67,6 @@ function cldProps = cloudProperties(pStats,iwg,combinedConc)
 %     velocity_w = velocity_w' ;
     velocity_w(velocity_w<-9990) = nan;
     cldProps = table(holoTime,HoloLatitude,HoloLongitude,GPSHoloAltitude, ...
-         concL, LWC , velocity_w,drizzleLWC );
+         concL, LWC , velocity_w,drizzleLWC,holoMean,holoStd );
     
 end

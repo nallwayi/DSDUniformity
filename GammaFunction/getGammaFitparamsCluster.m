@@ -108,6 +108,8 @@ sgtitle([filename '_' cfg.fileHeader  clstrParamsNames ])
 savefig([cfg.folderHeader '/' cfg.clusteringAlgo 'Results/'  filename '_' cfg.fileHeader  clstrParamsNames '.fig'])
 close
 
+save([cfg.folderHeader '/' cfg.clusteringAlgo 'Results/'  filename '_' ...
+    cfg.fileHeader  clstrParamsNames '.mat'],'shape','scale','holoClusters')
 % subplot(1,2,2)
 % x = 0:0.1:60;
 % for cnt=1:size(holoClusters,1)+2

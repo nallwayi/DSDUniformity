@@ -71,7 +71,11 @@ if ~exist([cfg.folderHeader '/DBSCANResults/ClstrSizeWtMinPtsEps_' ...
 end
 
 ind = find(nClusters' == max(reshape(nClusters,1,[])),1);
-indCm = rem(ind,size(nClusters,2));
+if rem(ind,size(nClusters,2))~= 0
+    indCm = rem(ind,size(nClusters,2));
+else
+    indCm = ind;
+end
 indRw = ceil(ind/size(nClusters,2));
 
 eps = eps(indRw);

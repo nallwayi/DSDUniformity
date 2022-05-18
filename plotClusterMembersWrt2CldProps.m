@@ -16,7 +16,7 @@ colorIndctr = ones(numel(cldProps.holoTime),1) * colors ;
 sz = 20;
 
 
-filelocation = fullfile(cfg.folderHeader,'DBSCANResults');
+filelocation = fullfile(cfg.folderHeader,[  cfg.clusteringAlgo 'Results']);
 filedetailsClstr = dir(fullfile(filelocation,'*.mat'));
 filedetailsprtcleDiam = dir(fullfile(cfg.folderHeader,'*.mat'));
 
