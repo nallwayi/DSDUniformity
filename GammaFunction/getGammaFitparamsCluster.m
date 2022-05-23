@@ -48,7 +48,12 @@ numConc = nan(size(prtcleDiam,2),1);
 for cnt=1:size(prtcleDiam,2)
     numConc(cnt) = sum(~isnan(prtcleDiam(:,cnt)));
 end
-cutOffNumConc     = round(0.7 * mean(numConc)); %percent cutoff determination
+if cfg.ncCutoff <1
+    cutOffNumConc = round(cfg.ncCutoff * mean(numConc)); %percent cutoff determination
+else
+    cutOffNumConc = cfg.ncCutoff;
+end
+
 
 % Fit for the data from holograms part of no clusters
 tmp = reshape(holoClusters,1,[]);
