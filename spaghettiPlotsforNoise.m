@@ -33,8 +33,8 @@ x  = x *1e6; %conversion to micrometers
 % x(x==0)=nan;
 % y(x==0)=nan;
 
-% f=figure;%('Name','ClusterPDF','units','normalized','outerposition',[0 0 1 1]);
-filename = 'ClstrSpaghettiPlts';
+f=figure;%('Name','ClusterPDF','units','normalized','outerposition',[0 0 1 1]);
+filename = 'NoiseSpaghettiPlts';
     plot(x(:),y(:),'LineStyle','-','Color',[0.635 0.078 0.184],...
         'Marker','.','MarkerSize',3);
     hold on
@@ -46,7 +46,7 @@ ylabel('PDF')
 legend(leg);
 xlim([5 60])
 pbaspect([1 1 1])
-% savefig([cfg.folderHeader '/' cfg.clusteringAlgo 'Results/'  filename '_' cfg.fileHeader  clstrParamsNames '.fig'])
-% close(f)
+savefig([cfg.folderHeader '/' cfg.clusteringAlgo 'Results/'  filename '_' cfg.fileHeader  clstrParamsNames '.fig'])
+close(f)
 end
 

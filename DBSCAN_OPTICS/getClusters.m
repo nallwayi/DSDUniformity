@@ -119,5 +119,10 @@ if ~exist([cfg.folderHeader '/' cfg.clusteringAlgo 'Results/ClstrSpaghettiPlts_'
         clstrParamsNames '.fig'],'file')
     spaghettiPlotsforClusters(prtcleDiam,cluster,customCmap,clstrParamsNames)
 end
+if ~exist([cfg.folderHeader '/' cfg.clusteringAlgo 'Results/NoiseSpaghettiPlts_' cfg.fileHeader  ...
+        clstrParamsNames '.fig'],'file')
+    spaghettiPlotsforNoise(prtcleDiam,cluster,clstrParamsNames)
+end
+
 end
 %--------------------------------------------------------------------------

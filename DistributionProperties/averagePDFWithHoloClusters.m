@@ -84,8 +84,8 @@ stdCDF(end+1,:) = nanstd(CDF);
     EntireSedId = EntireSedId(~isnan(EntireSedId));
 for cnt2 = 1:numel(EntireSedId)
     [binCntr(cnt2,:),PDF(cnt2,:)] = ...
-        getPDFDistribution(prtcleDiam(:,cnt2),'normal'); 
-    [binCntrCDF(cnt2,:),CDF(cnt2,:)] = getbinCDF(prtcleDiam(:,cnt2));
+        getPDFDistribution(prtcleDiam(:,EntireSedId(cnt2)),'normal'); 
+    [binCntrCDF(cnt2,:),CDF(cnt2,:)] = getbinCDF(prtcleDiam(:,EntireSedId(cnt2)));
     
 end
 mnbinCntr(end+1,:) = nanmean(binCntr);
@@ -114,8 +114,8 @@ belowCutoffHolograms = setdiff(1:numel(numConc),tmp2);
     
 for cnt2 = 1:numel(belowCutoffHolograms)
     [binCntr(cnt2,:),PDF(cnt2,:)] = ...
-        getPDFDistribution(prtcleDiam(:,cnt2),'normal'); 
-    [binCntrCDF(cnt2,:),CDF(cnt2,:)] = getbinCDF(prtcleDiam(:,cnt2));
+        getPDFDistribution(prtcleDiam(:,belowCutoffHolograms(cnt2)),'normal'); 
+    [binCntrCDF(cnt2,:),CDF(cnt2,:)] = getbinCDF(prtcleDiam(:,belowCutoffHolograms(cnt2)));
     
 end
 mnbinCntr(end+1,:) = nanmean(binCntr);
