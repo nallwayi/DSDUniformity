@@ -1,6 +1,8 @@
 % Function to plot the cluster members of a segment with respect to any two
 % variables of interest
 % Modified April 11,2022 to account for cfg file
+% Modified July 15,2022 to distinguish holograms with threshold level
+% drizzle embryo concentration
 
 function plotClusterMembersWrt2CldProps(cldProps,var1,var2)
 
@@ -47,6 +49,12 @@ if cluster.nClusters > size(customCmap,1)-1
     end
 end
 
+
+% Segmentiing regions with onset of drizzzle
+cutoffDWC = 0.02; %gm/cm^3
+drizzInd = find(cldProps.drizzleLWC > cutoffDWC);
+ 
+
 filename = ['ClstWrt_' var1 '_' var2];
 f = figure('units','normalized','outerposition',[0 0 1 1]);
 hold on
@@ -56,12 +64,27 @@ for cnt2 = 1:cluster.nClusters
     ind = cluster.clusterInfo == cnt2-1;
     clstrTime = holotime(ind);
     ind2=nan(sum(ind),1);
+    ind3=nan(sum(ind),1);
     for cnt3 = 1:numel(clstrTime)
 %         colorIndctr(cldProps.holoTime== clstrTime(cnt3),:) = customCmap(cnt2,:);
-        ind2(cnt3) = find(cldProps.holoTime== clstrTime(cnt3)); 
+        ttmp = find(cldProps.holoTime== clstrTime(cnt3));
+        if ismember(ttmp,drizzInd)
+            ind3(cnt3) = ttmp;
+        else
+            ind2(cnt3) = ttmp;
+        end
+
+        
     end
+    ind2(isnan(ind2))=[];
+    ind3(isnan(ind3))=[];
+    
     sc = scatter(cldProps.(var1)(ind2),cldProps.(var2)(ind2),...
     sz,customCmap(cnt2+1,:),'filled');
+    sc2=scatter(cldProps.(var1)(ind3),cldProps.(var2)(ind3),...
+    (sz+5),customCmap(cnt2+1,:),'filled');
+    sc2.Marker = '^';
+%     sc2.MarkerEdgeColor = 'black';
 end
 
 
