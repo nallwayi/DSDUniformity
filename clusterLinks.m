@@ -49,7 +49,7 @@ xlabel('Clusters,n')
 ylabel('n+1 link counts')
 
 linkPlt = fullfile(cfg.folderHeader,['/' cfg.clusteringAlgo 'Results/'...
-    /ClstrLinksHist' cfg.fileHeader '.fig']);
+    '/ClstrLinksHist' cfg.fileHeader '.fig']);
 
 savefig(linkPlt)
 
