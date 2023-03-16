@@ -17,13 +17,15 @@ function cldProps = cloudProperties(pStats,iwg,combinedConc)
 
     [~,concL] = getNumberConcentrationTimeSeries(pStats);
     [holoTime,LWC] = getLiquidWaterContentTimeSeries(pStats);
-    [holoMean,holoStd,holodiam3] = getPDFpropertiesTimeSeries(pStats);
+    [holoMean,holoStd,holodiam3,holoInterQuartileRange,...
+    holoskewness, holoRange, holoRelDisp] = getPDFpropertiesTimeSeries(pStats);
     
     for cnt = 1:size(combinedConc.conc,1)
         combinedSecond(cnt) = datetime2sod(combinedConc.conc.UTC(cnt));
     end
     cutoff = [40 10e3];
     lwcDrizzle = getDrizzleFromCombinedData(combinedConc,cutoff);
+    [holoTime,holoDrizzle] = getDrizzleFromHolodec(pStats,cutoff);
     drizzleLWC = nan(size(holoTime));
     
     for cnt = 1:numel(combinedSecond)
@@ -67,6 +69,7 @@ function cldProps = cloudProperties(pStats,iwg,combinedConc)
 %     velocity_w = velocity_w' ;
     velocity_w(velocity_w<-9990) = nan;
     cldProps = table(holoTime,HoloLatitude,HoloLongitude,GPSHoloAltitude, ...
-         concL, LWC , velocity_w,drizzleLWC,holoMean,holoStd,holodiam3 );
+         concL, LWC , velocity_w,drizzleLWC,holoMean,holoStd,holodiam3,...
+         holoDrizzle,holoInterQuartileRange,holoskewness, holoRange,holoRelDisp);
     
 end
