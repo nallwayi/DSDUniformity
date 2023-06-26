@@ -3,6 +3,8 @@
 % Modified April 11,2022 to account for cfg file
 % Modified July 15,2022 to distinguish holograms with threshold level
 % drizzle embryo concentration
+% Modified Feb 21, 2023 to add the entire segment values 
+
 
 function plotClusterMembersWrt2CldProps(cldProps,var1,var2)
 
@@ -52,7 +54,7 @@ end
 
 % Segmentiing regions with onset of drizzzle
 cutoffDWC = 0.02; %gm/cm^3
-drizzInd = find(cldProps.drizzleLWC > cutoffDWC);
+drizzInd = find(cldProps.holoDrizzle > cutoffDWC);
  
 
 filename = ['ClstWrt_' var1 '_' var2];
@@ -85,6 +87,32 @@ for cnt2 = 1:cluster.nClusters
     (sz+5),customCmap(cnt2+1,:),'filled');
     sc2.Marker = '^';
 %     sc2.MarkerEdgeColor = 'black';
+end
+
+
+% Plotting the parameter for the entire segment
+
+entireSegment = reshape(prtcleDiam,1,[]);
+entireSegment(isnan(entireSegment))=[];
+entireSegmentMean     = mean(entireSegment);
+
+
+
+if strcmp(var2,'holoInterQuartileRange')
+    entireSegmentIQR = iqr(entireSegment);
+    scatter(entireSegmentMean,entireSegmentIQR,100,'k','filled')
+elseif strcmp(var2,'holoStd')
+    entireSegmentStd = std(entireSegment);
+    scatter(entireSegmentMean,entireSegmentStd,100,'k','filled')
+elseif strcmp(var2,'holoskewness')    
+    entireSegmentSkewness = skewness(entireSegment);   
+    scatter(entireSegmentMean,entireSegmentSkewness,100,'k','filled')  
+elseif strcmp(var2,'holoRange') 
+    entireSegmentRange = range(entireSegment);   
+    scatter(entireSegmentMean,entireSegmentRange,100,'k','filled')  
+elseif strcmp(var2,'holoRelDisp')
+    entireSegmentRelDisp = std(entireSegment)/mean(entireSegment);
+    scatter(entireSegmentMean,entireSegmentRelDisp,100,'k','filled')
 end
 
 
