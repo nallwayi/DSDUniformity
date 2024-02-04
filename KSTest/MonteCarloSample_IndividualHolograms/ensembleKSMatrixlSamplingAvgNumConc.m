@@ -41,34 +41,47 @@ else
 
 end
 
-
-
-if ensmblNs > 2
-    if strcmp(microphysicsScheme,'holodec')
+if strcmp(microphysicsScheme,'holodec')
+    if ensmblNs >2
         parfor cnt = 1:ensmblNs
             KSMatrixCondConc = KSMatrixWithConditionalSamplingAvgNumConc...
                 (ncCutoff,alphaVal,smplgCutoff,prtcleDiam,scale,nRows,rowInd,ksmethod);
             ensmblKSMatrixCondConc = ensmblKSMatrixCondConc + KSMatrixCondConc;
         end
     else
-        parfor cnt = 1:ensmblNs
-            KSMatrixCondConc = KSMatrixWithConditionalSamplingAvgNumConcLES...
-                (ncCutoff,alphaVal,smplgCutoff,prtcleDiam,scale,nRows,rowInd,binnedData,binSmplgCnt,ksmethod);
-            ensmblKSMatrixCondConc = ensmblKSMatrixCondConc + KSMatrixCondConc;
-        end
-    end
-else
-        if strcmp(microphysicsScheme,'holodec')
         KSMatrixCondConc = KSMatrixWithConditionalSamplingAvgNumConc...
             (ncCutoff,alphaVal,smplgCutoff,prtcleDiam,scale,nRows,rowInd,ksmethod);
         ensmblKSMatrixCondConc = ensmblKSMatrixCondConc + KSMatrixCondConc;
-    else
-        KSMatrixCondConc = KSMatrixWithConditionalSamplingAvgNumConcLES...
-            (ncCutoff,alphaVal,smplgCutoff,prtcleDiam,scale,nRows,rowInd,binnedData,binSmplgCnt,ksmethod);
-        ensmblKSMatrixCondConc = ensmblKSMatrixCondConc + KSMatrixCondConc;
-																		   
+    end
+elseif strcmp(microphysicsScheme,'sd')
+    if ensmblNs >2
+        parfor cnt = 1:ensmblNs
+            KSMatrixCondConc = KSMatrixWithConditionalSamplingAvgNumConcLESSD...
+                (ncCutoff,alphaVal,smplgCutoff,prtcleDiam,scale,nRows,rowInd,binnedData,binSmplgCnt,ksmethod);
+            ensmblKSMatrixCondConc = ensmblKSMatrixCondConc + KSMatrixCondConc;
         end
+    else
+            KSMatrixCondConc = KSMatrixWithConditionalSamplingAvgNumConcLESSD...
+                (ncCutoff,alphaVal,smplgCutoff,prtcleDiam,scale,nRows,rowInd,binnedData,binSmplgCnt,ksmethod);
+            ensmblKSMatrixCondConc = ensmblKSMatrixCondConc + KSMatrixCondConc;
+    end
+
+elseif strcmp(microphysicsScheme,'bin')
+    if ensmblNs >2
+        parfor cnt = 1:ensmblNs
+            KSMatrixCondConc = KSMatrixWithConditionalSamplingAvgNumConcLESBIN...
+                (ncCutoff,alphaVal,smplgCutoff,prtcleDiam,scale,nRows,rowInd,binnedData,binSmplgCnt,ksmethod);
+            ensmblKSMatrixCondConc = ensmblKSMatrixCondConc + KSMatrixCondConc;
+        end
+    else
+            KSMatrixCondConc = KSMatrixWithConditionalSamplingAvgNumConcLESBIN...
+                (ncCutoff,alphaVal,smplgCutoff,prtcleDiam,scale,nRows,rowInd,binnedData,binSmplgCnt,ksmethod);
+            ensmblKSMatrixCondConc = ensmblKSMatrixCondConc + KSMatrixCondConc;
+    end    
+else
+    error('Invalid micrphysics scheme')
 end
+
 
 
 % Normalizing the ensemble sum
