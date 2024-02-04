@@ -1,8 +1,9 @@
-% Function to get the average cluster member dsd parameter values
-% Feb 22, 2023
+% Function to calulate the ind hologram dist properties for different
+% clusters and get the box plots for the same
+% Aug 24, 2023
 
 
-function getClusterPDFProps(cldProps)
+function getIndClusterProps(cldProps)
 
 global cfg
 
@@ -66,18 +67,23 @@ for cnt = 1:cluster.nClusters
         else
             ind2(cnt2) = ttmp;
         end
-        
-        
+
     end
     ind2(isnan(ind2))=[];
     ind3(isnan(ind3))=[];
-    
-    
+
+
     vars = cldProps.Properties.VariableNames;
-    fnames = {'holoMean';'holoInterQuartileRange'; 'holoStd'; 'holoskewness'; 'holoRange'; 'holoRelDisp'};
+    fnames = {'concL';'LWC';'velocity_w';'holoMean';'holoInterQuartileRange'; 'holoStd'; 'holoskewness'; 'holoRange'; 'holoRelDisp'};
+    tmp=[];
     for cnt3=1:length(fnames)
-        clstrPDFProps.(fnames{cnt3})(cnt,1) = mean(cldProps.(vars{strcmp(vars,fnames{cnt3})})([ind2 ;ind3]));
+        try
+            tmp = clstrIndvPDFProps.(fnames{cnt3});
+        end
+        tmp.(['C' num2str(cnt)]) = (cldProps.(vars{strcmp(vars,fnames{cnt3})})([ind2 ;ind3]));
+        clstrIndvPDFProps.(fnames{cnt3}) = tmp;
     end
+
 end
 
 % Calculating values for the entire segment that satisfy the 70 percent
@@ -88,43 +94,33 @@ cutOff = round(0.7*sum(~isnan(reshape(prtcleDiam,1,[])))/size(prtcleDiam,2));
 
 lessThanThresh=[];
 for cnt=1:size(prtcleDiam,2)
-    
+
     prtclDiamArray = prtcleDiam(:,cnt);
     prtclDiamArray(isnan(prtclDiamArray)) = [];
     prtclDiamArray(prtclDiamArray < 10e-6) = [];
-    
+
     if length(prtclDiamArray) < cutOff
         lessThanThresh = [lessThanThresh; cnt];
     end
-    
+
 end
 
 unclusteredInd = setdiff(find(cluster.clusterInfo ==-1),lessThanThresh);
 greaterThanThresh  = setdiff(1:size(prtcleDiam,2),lessThanThresh);
 
+ttmp=[];
+for cnt=1:numel(unclusteredInd);
+    ttmp(cnt) = find(cldProps.holoTime== holotime(unclusteredInd(cnt)));
+end
+
+for cnt=1:length(fnames)
+    clstrIndvPDFProps.(fnames{cnt}).uncls=  (cldProps.(vars{strcmp(vars,fnames{cnt})})([ttmp]))
+end
 entireSegment = reshape(prtcleDiam(:,greaterThanThresh),1,[]);
 entireSegment(isnan(entireSegment))=[];
+entireSegment(entireSegment<10e-6)=[];
 entireSegmentMean     = mean(entireSegment)*1e6;
-clstrPDFProps.holoMean(end+1,1) = mean(entireSegment);
-clstrPDFProps.holoInterQuartileRange(end+1,1) = iqr(entireSegment);
-clstrPDFProps.holoStd(end+1,1) = std(entireSegment);
-clstrPDFProps.holoskewness(end+1,1) = skewness(entireSegment);
-clstrPDFProps.holoRange(end+1,1) = range(entireSegment); 
-clstrPDFProps.holoRelDisp(end+1,1) = std(entireSegment)/mean(entireSegment);
 
-clstrPDFProps = struct2table( clstrPDFProps );
-
-
-
-
-clustrFrac.totalHolograms = size(prtcleDiam,2);
-clustrFrac.clusteredHolograms = length(clusteredInd);
-clustrFrac.unClusterdHolograms = length(unclusteredInd);
-clustrFrac.belowThreshHolograms = length(lessThanThresh);
-clustrFrac.classifiedFraction = length(clusteredInd)/...
-    (length(clusteredInd) + length(unclusteredInd));
-clustrFrac.threshEliminatedFraction = length(lessThanThresh)/...
-    size(prtcleDiam,2);
 
 %sanity check
 if (length(clusteredInd) + length(unclusteredInd) + length(lessThanThresh))...
@@ -132,6 +128,59 @@ if (length(clusteredInd) + length(unclusteredInd) + length(lessThanThresh))...
     warning('Calc error')
     clustrFrac.calcError = true;
 end
-save([cfg.folderHeader '/ClusterPDFProps/clstrPDFProps_' cfg.fileHeader '.mat'],'clstrPDFProps','clustrFrac');
-
+save([cfg.folderHeader '/ClusterPDFProps/clstrIndvPDFProps_' cfg.fileHeader '.mat'],'clstrIndvPDFProps');
+% plotBoxPlots(clstrIndvPDFProps,customCmap)
 end
+
+
+
+function plotBoxPlots(clstrIndvPDFProps,customCmap)
+global cfg
+fnames = fieldnames(clstrIndvPDFProps);
+customCmap(1,:)=[];
+for cnt=1:length(fnames)
+    data = clstrIndvPDFProps.(fnames{cnt});
+
+    
+    data = struct2cell(data);
+    clstrSz = cellfun('length',data);
+    colmnSz = max(clstrSz);
+    clstrIndvPDFMtrx = NaN(colmnSz,numel(data));
+
+    for cnt2 = 1:numel(data)
+        clstrIndvPDFMtrx(1:clstrSz(cnt2),cnt2) = data{cnt2};
+    end
+
+%     figure
+%     boxplot(clstrIndvPDFMtrx)
+
+    % Create a figure with custom size and background color
+   f=  figure;
+
+    % Create a box plot with customized settings and colors
+    boxplot(clstrIndvPDFMtrx, 'Labels', fieldnames(clstrIndvPDFProps.(fnames{cnt})), ...
+        'Notch', 'on',  ...
+        'Colors', customCmap, 'Widths', 0.15,'PlotStyle','compact')
+    % Add labels and title
+    xlabel('Clusters', 'FontWeight', 'bold', 'FontSize', 12);
+    ylabel(fnames{cnt}, 'FontWeight', 'bold', 'FontSize', 12);
+    title('', 'FontWeight', 'bold', 'FontSize', 14);
+
+    set(gca, 'FontWeight', 'bold', 'FontSize', 10);
+
+
+
+%     % Add a legend
+%     legend('Group A', 'Group B', 'Group C', 'Location', 'Best');
+% 
+%     % Adjust the plot box aspect ratio for better appearance
+%     pbaspect([1, 1, 1]);
+%     %
+
+savefig([cfg.folderHeader '/ClusterPDFProps/clstrIndvPDFProps_' fnames{cnt} '_' cfg.fileHeader '.fig'])
+exportgraphics(f,[cfg.folderHeader '/ClusterPDFProps/clstrIndvPDFProps_' fnames{cnt} '_' cfg.fileHeader '.png']);
+close(f)
+end
+end
+
+

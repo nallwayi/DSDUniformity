@@ -14,7 +14,11 @@ for cnt=1:cluster.nClusters
     ind = find(clusters == cnt);
     
     for cnt2 = 1:numel(ind)
-        tmp = clusters(ind(cnt2)+1);
+        if ind(cnt2)<numel(clusters)
+            tmp = clusters(ind(cnt2)+1);
+        else
+            tmp = clusters(1);
+        end
         linkCntr(cnt,tmp) = linkCntr(cnt,tmp)+1;
     end
     
