@@ -1,4 +1,4 @@
-function [H, pValue, KSstatistic] = kstest2LES(x1, x2, m1, m2, binnedData,varargin)
+function [H, pValue, KSstatistic] = kstest2LESbin(x1, x2, m1, m2, varargin)
 %KSTEST2 Two-sample Kolmogorov-Smirnov goodness-of-fit hypothesis test.
 %   H = KSTEST2(X1,X2) performs a Kolmogorov-Smirnov (K-S) test 
 %   to determine if independent random samples, X1 and X2, are drawn from 
@@ -70,7 +70,7 @@ end
 
 % Parse optional inputs
 alpha = []; tail = [];
-if nargin >=6
+if nargin >=3
     if isnumeric(varargin{1})
         % Old syntax
         alpha = varargin{1};
@@ -157,29 +157,17 @@ end
 %
 % Calculate F1(x) and F2(x), the empirical (i.e., sample) CDFs.
 %
+[x,indtmp] = sort([x1; x2]);
+m = [m1; m2];
+m = m(indtmp);
+
+binEdges1    =  [-inf ; x1; inf];
+binEdges2    =  [-inf ; x2; inf];
 
 
-if binnedData
-    if length(x1) == length(x2)
-        binEdges1    =  [-inf ; x1; inf];
-        binEdges2    =  [-inf ; x2; inf];
-        
-        binCounts1  =  histc(x1, binEdges1, 1).*[0; m1; 0];
-        binCounts2  =  histc(x2 , binEdges2, 1).*[0; m2; 0];
-    else
-        error('For bin schemes the number of bins for 2 samples must be the same')
-    end
-else
-    [x,indtmp] = sort([x1; x2]);
-    m = [m1; m2];
-    m = m(indtmp);
-    
-    binEdges    =  [-inf ; x; inf];
-    
-    binCounts1  =  histc(x1, binEdges, 1).*[0; m; 0];
-    binCounts2  =  histc(x2 , binEdges, 1).*[0; m; 0];
-    
-end
+binCounts1  =  histc(x1, binEdges1, 1).*[0; m1; 0];
+binCounts2  =  histc(x2 , binEdges2, 1).*[0; m2; 0];
+
 sumCounts1  =  cumsum(binCounts1)./sum(binCounts1);
 sumCounts2  =  cumsum(binCounts2)./sum(binCounts2);
 
@@ -190,7 +178,7 @@ sampleCDF2  =  sumCounts2(1:end-1);
 % Compute the test statistic of interest.
 %
 
-    switch tail
+switch tail
    case  0      %  2-sided test: T = max|F1(x) - F2(x)|.
       deltaCDF  =  abs(sampleCDF1 - sampleCDF2);
 
@@ -211,8 +199,6 @@ KSstatistic   =  max(deltaCDF);
 n1     =  length(x1);
 n2     =  length(x2);
 n      =  n1 * n2 /(n1 + n2);
-n      =  sum(m1) * sum(m2) /(sum(m1) + sum(m2));%temporary change remove later
-% n      = 1000; %temporary change remove later
 lambda =  max((sqrt(n) + 0.12 + 0.11/sqrt(n)) * KSstatistic , 0);
 
 if tail ~= 0        % 1-sided test.

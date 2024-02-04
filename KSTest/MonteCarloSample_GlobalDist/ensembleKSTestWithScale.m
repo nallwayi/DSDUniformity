@@ -14,6 +14,17 @@ ensmblNs = 1e4;
 % comparisons from the sample ensembles
 cutoffh   = 0.5;
 
+prtcleDiam(prtcleDiam<10e-6) =nan;
+numConc = nan(size(prtcleDiam,2),1);
+for cnt=1:size(prtcleDiam,2)
+    numConc(cnt) = sum(~isnan(prtcleDiam(:,cnt)));
+end
+trimPercent = 0.25;
+
+% numConcS = sort(numConc(numConc~=0));
+% trmdnumConc = (numConcS(round(trimPercent*numel(numConc)):...
+%     round((1-trimPercent)*numel(numConc)) ));
+Ncutoff = 0.7*mean(numConc);
 
 mainDist = reshape(prtcleDiam,[],1); % Main Distribution
 mainDist = mainDist(~isnan(mainDist));
@@ -36,6 +47,7 @@ parfor cnt = 1:size(tmp,2)
     testDist  = tmp(:,cnt);
     testDist  = testDist(~isnan(testDist));
     
+    
 % %     Performing the KS Test
 %     [hEnsmbl(cnt),pEnsmbl(cnt),ks2statEnsmbl(cnt)]= ...
 %     ensembleKSTest(testDist,mainDist,ensmblNs);
@@ -47,8 +59,12 @@ parfor cnt = 1:size(tmp,2)
 %     end
 
 %     Performing the KS Test
+if numConc(cnt) > Ncutoff && numConc(cnt) >100
     hEnsmblPass(cnt)= ...
-    ensembleKSTest(testDist,mainDist,ensmblNs);
+        ensembleKSTest(testDist,mainDist,ensmblNs);
+else
+    hEnsmblPass(cnt)= 0;
+end
 
 %     if hEnsmbl < cutoffh
 %         hAvg(cnt) = 0;

@@ -10,7 +10,7 @@
 % KSMatrixWithConditionalSamplingAvgNumConc for the SD-LES data
 
 function KSMatrixCondConc = KSMatrixWithConditionalSamplingAvgNumConcLES...
-    (ncCutoff,alphaVal,smplgCutoff,prtcleDiam,scale,nRows,rowInd,microphysicsScheme)
+    (ncCutoff,alphaVal,smplgCutoff,prtcleDiam,scale,nRows,rowInd,binnedData,binSmplgCnt,ksmethod)
 
 
 
@@ -30,19 +30,37 @@ end
 
 if iscell(prtcleDiam)
     SDCnt = cellfun('length',prtcleDiam(1,:));
+
     numConc = nan(size(prtcleDiam,2),1);
     for cnt=1:size(prtcleDiam,2)
-        tmp =prtcleDiam{2,cnt};
-        tmp(tmp<1e-2) = 0;
-        try
-            tmp = tmp/min(tmp(tmp~=0));
-        end
-        prtcleDiam{2,cnt} = round(tmp);
         numConc(cnt) = sum(prtcleDiam{2,cnt});
+%         tmp =prtcleDiam{2,cnt};
+%         tmp(tmp<1e-2) = 0;
+%         try
+%             tmp = tmp/min(tmp(tmp~=0));
+%         end
+%
+%         prtcleDiam{2,cnt} = round(tmp);
     end
-    if strcmp(microphysicsScheme,'sd')
-        numConc(numConc <1e3) = NaN;
+
+    % Trimming the extremes for calculating the mean value
+    trimPercent = 0.25;
+
+    numConcS = sort(numConc(numConc~=0));
+    trmdnumConc = (numConcS(round(trimPercent*numel(numConc)):...
+        round((1-trimPercent)*numel(numConc)) ));
+
+    % Making the mean number concentration equivalent to binSmplgCnt
+    fac = mean(trmdnumConc)/binSmplgCnt;
+    trmdnumConc = trmdnumConc /fac;
+    numConc     = numConc / fac ;
+    for cnt=1:size(prtcleDiam,2)
+        prtcleDiam{2,cnt} = round(prtcleDiam{2,cnt} /fac); 
     end
+    %     if strcmp(microphysicsScheme,'sd')
+    %         numConc = numConc/min(numConc);
+%         numConc(numConc <1e3) = NaN;
+%     end
 else
     % Setting the cutoff to 10 um
     prtcleDiam(prtcleDiam<10e-6) =nan;
@@ -57,7 +75,8 @@ end
 
 if ncCutoff<1
     if iscell(prtcleDiam) && size(prtcleDiam,1) >1
-        cutOffNumConc = round(ncCutoff*nanmean(numConc));
+        cutOffNumConc = round(ncCutoff*mean(trmdnumConc));
+%         cutOffNumConc = round(ncCutoff*nanmean(numConc));
     else
         cutOffNumConc = round(ncCutoff * nanmean(numConc)); %percent cutoff determination
     end
@@ -67,10 +86,13 @@ end
 
 if smplgCutoff ~= -9999
     if iscell(prtcleDiam) && size(prtcleDiam,1) >1
-        smplngcutOffNumConc = round(smplgCutoff*nanmean(numConc));
+        smplngcutOffNumConc = round(smplgCutoff*mean(trmdnumConc));
+%         smplngcutOffNumConc = round(smplgCutoff*nanmean(numConc));
     else
         smplngcutOffNumConc = round(smplgCutoff * nanmean(numConc));
     end
+else
+    smplngcutOffNumConc=[];
 end
 cntr=1;
 
@@ -95,7 +117,7 @@ for cnt = ksInd(1): ksInd(2)
     end
     
     if ~isempty(dist) && numConc(cnt) >= cutOffNumConc
-        if exist('smplngcutOffNumConc','var')
+        if ~isempty(smplngcutOffNumConc)
             if iscell(prtcleDiam) && size(prtcleDiam,1) >1
                 sel = randi(sum(mult1),cutOffNumConc,1);
                 [mult1,~] = histcounts(sel,[0 cumsum(mult1)]);
@@ -123,7 +145,7 @@ for cnt = ksInd(1): ksInd(2)
             end
             
             if ~isempty(testDist) && numConc(cnt2) >= cutOffNumConc
-                if exist('smplngcutOffNumConc','var')
+                if ~isempty(smplngcutOffNumConc)
                     if iscell(prtcleDiam) && size(prtcleDiam,1) >1
                         sel = randi(sum(mult2),cutOffNumConc,1);
                         [mult2,~] = histcounts(sel,[0 cumsum(mult2)]);
@@ -131,8 +153,12 @@ for cnt = ksInd(1): ksInd(2)
                         testDist = generateRandomSample(testDist,smplngcutOffNumConc);
                     end
                 end
-                ksresult = kstest2LES(dist,testDist,mult1,mult2,microphysicsScheme,'alpha',alphaVal);
-                KSMatrixCondConc(cntr,cnt2) = ksresult;
+                [ksresult, pValue, KSstatistic] = kstest2LES(dist,testDist,mult1,mult2,binnedData,'alpha',alphaVal);
+                if strcmp(ksmethod,'h')
+                    KSMatrixCondConc(cntr,cnt2) = ksresult;
+                else
+                    KSMatrixCondConc(cntr,cnt2) = 1-pValue;
+                end
                 %             else
                 %                 ksresult = 0.5;
             end
