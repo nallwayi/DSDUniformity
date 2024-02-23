@@ -47,10 +47,10 @@ trmdMultCnt = (multCnt(round(trimPercent*numel(multCnt)):...
 if binSmplgCnt>0
     fac = mean(trmdMultCnt)/binSmplgCnt;
 else
-    fac = mean(trmdMultCnt)/1000;
+    fac = 1;%mean(trmdMultCnt)/1000;
 end
 trmdMultCnt = trmdMultCnt /fac;
-numConc     = multCnt / fac ;
+numConc     = numConc / fac ;
 for cnt=1:size(prtcleDiam,2)
     prtcleDiam{2,cnt} = round(prtcleDiam{2,cnt} /fac);
 end
