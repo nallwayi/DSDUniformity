@@ -76,9 +76,12 @@ for cnt = ksInd(1): ksInd(2)
     if size(prtcleDiam,1) >1
         dist=[];dist_mult=[];dist_sdcnt=[];
         dist = prtcleDiam{1,cnt};
-        dist_mult = prtcleDiam{2,cnt};
-%         dist_sdcnt = prtcleDiam{3,cnt};
-        dist_sdcnt = sum(prtcleDiam{2,cnt}>0);
+        dist_mult = prtcleDiam{2,cnt};        
+        if binSmplgCnt>0
+            dist_sdcnt = sum(dist_mult);
+        else
+            dist_sdcnt = sum(prtcleDiam{2,cnt}>0);
+        end
     else
         dist    = prtcleDiam{1,cnt};
         dist(isnan(dist)) = [];
@@ -89,6 +92,7 @@ for cnt = ksInd(1): ksInd(2)
             if iscell(prtcleDiam) && size(prtcleDiam,1) >1
                 sel = randi(sum(dist_mult),cutOffNumConc,1);
                 [dist_mult,~] = histcounts(sel,[0 cumsum(dist_mult)]);
+                dist_sdcnt = sum(dist_mult);
             else
                 dist = generateRandomSample(dist,smplngcutOffNumConc);
             end
@@ -97,9 +101,12 @@ for cnt = ksInd(1): ksInd(2)
             if size(prtcleDiam,1) >1
                 testDist=[];testDist_mult=[];testDist_sdcnt=[];
                     testDist = prtcleDiam{1,cnt2};
-                    testDist_mult = prtcleDiam{2,cnt2};
-%                     testDist_sdcnt = prtcleDiam{3,cnt2};
-                    testDist_sdcnt = sum(prtcleDiam{2,cnt2}>0);
+                    testDist_mult = prtcleDiam{2,cnt2};                    
+                    if binSmplgCnt>0
+                        testDist_sdcnt = sum(testDist_mult);
+                    else
+                        testDist_sdcnt = sum(prtcleDiam{2,cnt2}>0);
+                    end
             else
                 testDist =  prtcleDiam{1,cnt2};
                 testDist(isnan(testDist)) = [];
@@ -110,6 +117,7 @@ for cnt = ksInd(1): ksInd(2)
                     if iscell(prtcleDiam) && size(prtcleDiam,1) >1
                         sel = randi(sum(testDist_mult),cutOffNumConc,1);
                         [testDist_mult,~] = histcounts(sel,[0 cumsum(testDist_mult)]);
+                        testDist_sdcnt = sum(testDist_mult);
                     else
                         testDist = generateRandomSample(testDist,smplngcutOffNumConc);
                     end
