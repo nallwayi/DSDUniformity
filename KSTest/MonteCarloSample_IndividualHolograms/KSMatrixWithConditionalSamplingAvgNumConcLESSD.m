@@ -27,35 +27,41 @@ else
 end
 
 
-numConc = cell2mat( prtcleDiam(3,:));
+
+
+% Normalization part
+
+multCnt = nan(size(prtcleDiam,2),1);
+for cnt=1:size(prtcleDiam,2)
+    multCnt(cnt) = sum(prtcleDiam{2,cnt});
+end
+% Trimming the extremes for calculating the mean value
+trimPercent = 0.25;
+numConc = multCnt;
+
+multCnt = sort(multCnt(multCnt~=0));
+trmdMultCnt = (multCnt(round(trimPercent*numel(multCnt)):...
+    round((1-trimPercent)*numel(multCnt)) ));
+
+% Making the mean number concentration equivalent to binSmplgCnt
+if binSmplgCnt>0
+    fac = mean(trmdMultCnt)/binSmplgCnt;
+else
+    fac = mean(trmdMultCnt)/1000;
+end
+trmdMultCnt = trmdMultCnt /fac;
+numConc     = numConc / fac ;
+for cnt=1:size(prtcleDiam,2)
+    prtcleDiam{2,cnt} = round(prtcleDiam{2,cnt} /fac);
+end
+
+
+
 if ncCutoff<1
     cutOffNumConc = round(ncCutoff*nanmean(numConc));
 else
     cutOffNumConc = ncCutoff;
 end
-
-% Normalization part
-if binSmplgCnt>0
-    multCnt = nan(size(prtcleDiam,2),1);
-    for cnt=1:size(prtcleDiam,2)
-        multCnt(cnt) = sum(prtcleDiam{2,cnt});
-    end
-    % Trimming the extremes for calculating the mean value
-    trimPercent = 0.25;
-
-    multCnt = sort(multCnt(multCnt~=0));
-    trmdMultCnt = (multCnt(round(trimPercent*numel(multCnt)):...
-        round((1-trimPercent)*numel(multCnt)) ));
-
-    % Making the mean number concentration equivalent to binSmplgCnt
-    fac = mean(trmdMultCnt)/binSmplgCnt;
-    trmdMultCnt = trmdMultCnt /fac;
-    numConc     = numConc / fac ;
-    for cnt=1:size(prtcleDiam,2)
-        prtcleDiam{2,cnt} = round(prtcleDiam{2,cnt} /fac);
-    end
-end
-
 
 if smplgCutoff ~= -9999
     smplngcutOffNumConc = round(smplgCutoff*nanmean(numConc));
@@ -71,7 +77,11 @@ for cnt = ksInd(1): ksInd(2)
         dist=[];dist_mult=[];dist_sdcnt=[];
         dist = prtcleDiam{1,cnt};
         dist_mult = prtcleDiam{2,cnt};
-        dist_sdcnt = prtcleDiam{3,cnt};
+        if binSmplgCnt>0
+            dist_sdcnt = sum(dist_mult);
+        else
+            dist_sdcnt = sum(prtcleDiam{2,cnt}>0);
+        end
     else
         dist    = prtcleDiam{1,cnt};
         dist(isnan(dist)) = [];
@@ -91,7 +101,11 @@ for cnt = ksInd(1): ksInd(2)
                 testDist=[];testDist_mult=[];testDist_sdcnt=[];
                     testDist = prtcleDiam{1,cnt2};
                     testDist_mult = prtcleDiam{2,cnt2};
-                    testDist_sdcnt = prtcleDiam{3,cnt2};
+                    if binSmplgCnt>0
+                        testDist_sdcnt = sum(testDist_mult);
+                    else
+                        testDist_sdcnt = sum(prtcleDiam{2,cnt2}>0);
+                    end
             else
                 testDist =  prtcleDiam{1,cnt2};
                 testDist(isnan(testDist)) = [];
